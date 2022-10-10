@@ -1,0 +1,31 @@
+### Get
+GET http://localhost:3003/api/blogs
+
+
+### Create success
+POST http://localhost:3003/api/blogs HTTP/1.1
+content-Type: application/json
+
+{  
+  "title": "Blog demo title 2",
+  "author": "micron",
+  "url": "http://... blog",
+  "likes": 1
+}
+
+### Create fail raise errorHandler
+POST http://localhost:3003/api/blogs HTTP/1.1
+content-Type: application/json
+
+{  
+  "title": "Blog demo title 2",
+  "author": "micron",
+  "url": "http://... blog",
+  "likes": "valid number"
+}
+
+
+### Update
+
+
+### Delete
