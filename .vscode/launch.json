@@ -1,27 +1,38 @@
 {
-    "version": "0.2.0",
-    "configurations": [
+  "version": "0.2.0",
+  "configurations": [
+  {
+    "name": "jsCallASN",
+    "program": "${workspaceFolder}/tests/jsCallASN.js",
+    "request": "launch",
+    "skipFiles": [
+      "<node_internals>/**"
+    ],
+    "type": "node"
+  },
     {
       "name": "Debug js file",
-      "program": "${workspaceFolder}/tests/js_test.js",
+      "program": "${workspaceFolder}/mongodb-memory-server.js",
       "request": "launch",
       "skipFiles": [
         "<node_internals>/**"
       ],
       "type": "node"
     },
-      {
-        "name": "Debug Jest Tests",
-        "type": "node",
-        "request": "launch",
-        "runtimeArgs": [
-          "--inspect-brk",
-          "${workspaceRoot}/node_modules/jest/bin/jest.js",
-          "--runInBand"
-        ],
-        "cwd": "${workspaceRoot}",
-        "console": "integratedTerminal",
-        "internalConsoleOptions": "neverOpen"
-      }
-    ]
-  }
+    {
+      "name": "Debug Jest Tests",
+      "type": "node",
+      "request": "launch",
+      "runtimeArgs": [
+        "--inspect-brk",
+        "${workspaceRoot}/node_modules/jest/bin/jest.js",
+        "--runInBand",
+        "--testPathPattern=blog_api.test.js",
+        "--testNamePattern=4.11"
+      ],
+      "cwd": "${workspaceRoot}",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    }
+  ]
+}

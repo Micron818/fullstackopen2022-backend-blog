@@ -7,11 +7,12 @@ POST http://localhost:3003/api/blogs HTTP/1.1
 content-Type: application/json
 
 {  
-  "title": "Blog demo title 2",
+  "title": "Blog demo title 8",
   "author": "micron",
   "url": "http://... blog",
   "likes": 1
 }
+
 
 ### Create fail raise errorHandler
 POST http://localhost:3003/api/blogs HTTP/1.1

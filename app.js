@@ -1,11 +1,18 @@
 const config = require("./utils/config");
 const express = require("express");
+require("express-async-errors");
 const app = express();
 const cors = require("cors");
 const blogRouter = require("./controllers/blogs");
 const logger = require("./utils/logger");
 const mongoose = require("mongoose");
 const middleware = require("./utils/middleware");
+const mongoServer = require("./mongodb-memory-server");
+
+if (process.env.NODE_ENV === "test") {
+  //Start up memory mongodb
+  mongoServer.startInMemoryMongoDB();
+}
 
 logger.info("connecting to", config.MONGODB_URI);
 
