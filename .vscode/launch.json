@@ -1,16 +1,7 @@
 {
   "version": "0.2.0",
   "configurations": [
-  {
-    "name": "jsCallASN",
-    "program": "${workspaceFolder}/tests/jsCallASN.js",
-    "request": "launch",
-    "skipFiles": [
-      "<node_internals>/**"
-    ],
-    "type": "node"
-  },
-    {
+     {
       "name": "Debug js file",
       "program": "${workspaceFolder}/mongodb-memory-server.js",
       "request": "launch",
