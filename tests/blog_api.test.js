@@ -7,71 +7,164 @@ const api = supertest(app);
 const Blog = require("../models/blog");
 const helper = require("./test_helper");
 
-beforeEach(async () => {
-  await Blog.deleteMany({});
-  await Blog.insertMany(helper.initialBlogs);
+const User = require("../models/user");
+
+// jest.setTimeout(1000000);
+
+describe("4.16,bloglist expansion,user CRUD", () => {
+  beforeEach(async () => {
+    await User.deleteMany({});
+    await User.insertMany(helper.initialUsers);
+  });
+
+  test("verify initial user created", async () => {
+    const newUser = {
+      username: "test4.15",
+      name: "test4.15",
+      password: "test",
+    };
+
+    await api
+      .post("/api/users")
+      .send(newUser)
+      .expect(201)
+      .expect("Content-Type", /application\/json/);
+
+    const usersInDb = await helper.usersInDb();
+    expect(usersInDb).toHaveLength(helper.initialUsers.length + 1);
+  });
+
+  test("creating fails if username length less 3", async () => {
+    const newUser = {
+      username: "t4",
+      name: "test4.16",
+      password: "ps",
+    };
+
+    const result = await api
+      .post("/api/users")
+      .send(newUser)
+      .expect(400)
+      .expect("Content-Type", /application\/json/);
+
+    expect(result.body.error).toEqual("username length must be at least 3");
+  });
+
+  test("creating fails if password length less 3", async () => {
+    const newUser = {
+      username: "test4.16",
+      name: "test4.16",
+      password: "ps",
+    };
+
+    const result = await api
+      .post("/api/users")
+      .send(newUser)
+      .expect(400)
+      .expect("Content-Type", /application\/json/);
+
+    expect(result.body.error).toEqual("password length must be at least 3");
+  });
+
+  test("creating fails if username already taken ", async () => {
+    const newUser = {
+      username: "hellas",
+      name: "Arto Hellas",
+      password: "hellas.password",
+    };
+
+    const result = await api
+      .post("/api/users")
+      .send(newUser)
+      .expect(400)
+      .expect("Content-Type", /application\/json/);
+
+    expect(result.body.error).toEqual("username must be unique");
+  });
 });
 
-test("4.8: Blog list tests, step1, verify blogs length ", async () => {
-  const response = await api.get("/api/blogs");
+describe("4.23,bloglist expansion, blog CRUD", () => {
+  let token, user;
+  beforeEach(async () => {
+    await User.deleteMany();
+    await User.insertMany(helper.initialUsers);
 
-  expect(response.body).toHaveLength(helper.initialBlogs.length);
-});
+    await Blog.deleteMany();
+    await Blog.insertMany(helper.initialBlogs);
 
-test("4.9: Blog list tests, step2, verify id defined", async () => {
-  const response = await api.get("/api/blogs");
-  const getId = () => response.body[0].id;
-  expect(getId()).toBeDefined();
-});
+    user = {
+      username: "hellas",
+      name: "Arto Hellas",
+      password: "hellas",
+    };
+    const loginUser = await api.post("/login").send(user).expect(200);
+    token = loginUser.body.token;
+  });
 
-test("4.10: Blog list tests, step3, vefiry create", async () => {
-  const newBlog = {
-    title: "4.10: Blog list tests, step3, vefiry create",
-    author: "test",
-    likes: 10,
-    url: "test",
-  };
+  test("add blog with token successfully", async () => {
+    const newBlog = {
+      title: "add new blog success",
+      author: user.username,
+      url: "https://reactpatterns.com/",
+    };
 
-  const response = await api.post("/api/blogs").send(newBlog);
-  expect(response.body).toEqual({ ...newBlog, id: response.body.id });
+    const addedBlog = await api
+      .post("/api/blogs")
+      .set("Authorization", token)
+      .send(newBlog)
+      .expect(201);
 
-  const blogsInDb = await helper.blogsInDb();
-  expect(blogsInDb).toHaveLength(helper.initialBlogs.length + 1);
-});
+    expect(addedBlog.body.likes).toBe(0);
 
-test("4.11: Blog list tests, step4, default likes value 0", async () => {
-  const newBlog = {
-    title: "4.11: Blog list tests, step4, default likes value 0",
-    author: "test",
-    url: "test url",
-  };
+    user = await User.findById(addedBlog.body.user);
+    expect(user.blogs.toString()).toMatch(addedBlog.body.id);
+  });
 
-  const response = await api.post("/api/blogs").send(newBlog);
-  expect(response.body.likes).toBe(0);
-});
+  test("add blog miss token failed response 401", async () => {
+    const newBlog = {
+      title: "add new blog fail",
+      author: user.username,
+      url: "https://reactpatterns.com/",
+      likes: 7,
+    };
 
-test("4.12*: Blog list tests, step5, require title and url", async () => {
-  const newBlog = {};
-  await api.post("/api/blogs").send(newBlog).expect(400);
-});
+    const response = await api.post("/api/blogs").send(newBlog).expect(401);
+    expect(response.body.error).toBe(
+      "Unauthorized:missing authorization token in Header"
+    );
+  });
 
-test("4.13 Blog list expansions, step1, delete by id", async () => {
-  const blogToDelete = (await helper.blogsInDb())[0];
-  await api.delete(`/api/blogs/${blogToDelete.id}`).expect(204);
+  test("add blog require title and url", async () => {
+    const newBlog = {};
+    await api
+      .post("/api/blogs")
+      .set("Authorization", token)
+      .send(newBlog)
+      .expect(400);
+  });
 
-  const blogsInDb = await helper.blogsInDb();
-  expect(blogsInDb).not.toContainEqual(blogToDelete);
-});
+  test("delete blog", async () => {
+    const blogToDelete = (await helper.blogsInDb())[0];
+    await api
+      .delete(`/api/blogs/${blogToDelete.id}`)
+      .set("Authorization", token)
+      .expect(201);
 
-test("4.14 Blog list expansions, step2, update by id", async () => {
-  let blogToUpdate = (await helper.blogsInDb())[0];
-  blogToUpdate = { ...blogToUpdate, likes: ++blogToUpdate.likes };
-  const result = await api
-    .put(`/api/blogs/${blogToUpdate.id}`)
-    .send(blogToUpdate)
-    .expect(200);
-  blogToUpdate = (await helper.blogsInDb())[0];
-  expect(result.body).toEqual(blogToUpdate);
+    const blogsInDb = await helper.blogsInDb();
+    expect(blogsInDb).not.toContainEqual(blogToDelete);
+  });
+
+  test("update blog", async () => {
+    let blogToUpdate = (await helper.blogsInDb())[0];
+    blogToUpdate = { ...blogToUpdate, likes: ++blogToUpdate.likes };
+    const result = await api
+      .put(`/api/blogs/${blogToUpdate.id}`)
+      .set("Authorization", token)
+      .send(blogToUpdate)
+      .expect(201);
+    blogToUpdate = (await helper.blogsInDb())[0];
+    expect(JSON.stringify(result.body)).toEqual(JSON.stringify(blogToUpdate));
+  });
 });
 
 afterAll(() => {

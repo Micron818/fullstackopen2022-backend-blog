@@ -19,7 +19,7 @@
         "${workspaceRoot}/node_modules/jest/bin/jest.js",
         "--runInBand",
         "--testPathPattern=blog_api.test.js",
-        "--testNamePattern=4.11"
+        "--testNamePattern="
       ],
       "cwd": "${workspaceRoot}",
       "console": "integratedTerminal",

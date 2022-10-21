@@ -3,7 +3,9 @@ const express = require("express");
 require("express-async-errors");
 const app = express();
 const cors = require("cors");
+const loginRouter = require("./controllers/login");
 const blogRouter = require("./controllers/blogs");
+const usersRouter = require("./controllers/users");
 const logger = require("./utils/logger");
 const mongoose = require("mongoose");
 const middleware = require("./utils/middleware");
@@ -24,7 +26,14 @@ mongoose
 app.use(cors());
 app.use(express.json());
 
-app.use("/api/blogs", blogRouter);
+app.use("/login", loginRouter);
+app.use("/api/users", usersRouter);
+
+//set Authorition token to request.token
+app.use(middleware.tokenExtractor);
+
+app.use("/api/blogs", middleware.userExtractor, blogRouter);
+
 app.use(middleware.errorHandler);
 
 module.exports = app;

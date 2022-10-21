@@ -1,8 +1,8 @@
-### Get
+### Get all blogs
 GET http://localhost:3003/api/blogs
 
 
-### Create success
+### Create blog success
 POST http://localhost:3003/api/blogs HTTP/1.1
 content-Type: application/json
 
@@ -14,7 +14,7 @@ content-Type: application/json
 }
 
 
-### Create fail raise errorHandler
+### Create blog fail raise errorHandler
 POST http://localhost:3003/api/blogs HTTP/1.1
 content-Type: application/json
 
@@ -26,7 +26,44 @@ content-Type: application/json
 }
 
 
-### Update
+### Create user
+POST http://localhost:3003/api/users HTTP/1.1
+content-Type: application/json
 
+{
+  "username": "hellas",
+  "name": "Arto Hellas",
+  "password": "hellas"
+}
 
-### Delete
+### Create user
+POST http://localhost:3003/api/users HTTP/1.1
+content-Type: application/json
+
+{
+  "username": "mluukai",
+  "name": "Matti Luukkainen",
+  "password": "hashedpassword"
+}
+
+### Get Token
+POST http://localhost:3003/login HTTP/1.1
+content-Type: application/json
+
+{
+  "username": "hellas",
+  "name": "Arto Hellas",
+  "password": "hellas"
+}
+
+### Create blog with token
+POST http://localhost:3003/api/blogs HTTP/1.1
+content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImhlbGxhcyIsImlhdCI6MTY2NjI0NzEzOX0.xtixhWjrFcHWc7hRL1cTZz5jCP1KUvwsx9n3o3ZD0Io
+
+{  
+  "title": "bloglist expansion, step7",
+  "author": "micron",
+  "url": "http://... blog",
+  "likes": 1
+}

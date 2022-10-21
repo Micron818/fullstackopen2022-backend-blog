@@ -12,7 +12,7 @@ const startInMemoryMongoDB = async () => {
   const mongod = await MongoMemoryServer.create({ instance: instance });
 
   const uri = mongod.getUri();
-  console.log("mongo memory server started: ", uri);
+  // console.log("mongo memory server started: ", uri);
 
   // The Server can be stopped again with
   // await mongod.stop();
