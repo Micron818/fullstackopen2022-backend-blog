@@ -5,10 +5,10 @@ module.exports = {
     node: true,
     test: true,
   },
-  extends: "eslint:recommended",
+  extends: 'eslint:recommended',
   overrides: [],
   parserOptions: {
-    ecmaVersion: "latest",
+    ecmaVersion: 'latest',
   },
   rules: {},
-};
+}

@@ -8,7 +8,9 @@
   "scripts": {
     "start": "cross-env NODE_ENV=production node index",
     "dev": "cross-env NODE_ENV=development nodemon --inspect index.js",
-    "test": "cross-env NODE_ENV=test jest --verbose --runInBand --forceExit"
+    "local": "cross-env NODE_ENV=local nodemon --inspect index.js",
+    "test": "cross-env NODE_ENV=test jest --verbose --runInBand --forceExit",
+    "start:test": "cross-env NODE_ENV=test node index.js"
   },
   "devDependencies": {
     "@eslint/create-config": "^0.3.1",

@@ -1,5 +1,7 @@
 const jwt = require("jsonwebtoken");
 const logger = require("./logger");
+const User = require("../models/user");
+
 const errorHandler = (error, request, response, next) => {
   logger.error(error.message);
   switch (error.name) {
@@ -9,7 +11,7 @@ const errorHandler = (error, request, response, next) => {
       return response.status(400).json({ error: error.message });
     case "JsonWebTokenError":
       return response
-        .status(400)
+        .status(401)
         .json({ error: "Invalid token: " + error.message });
     default:
       break;
@@ -17,26 +19,18 @@ const errorHandler = (error, request, response, next) => {
   next(error);
 };
 
-const tokenExtractor = (request, response, next) => {
-  const authorization = request.get("Authorization");
-
-  if (!authorization || !authorization.startsWith("Bearer "))
-    return response
-      .status(401)
-      .json({ error: "Unauthorized:missing authorization token in Header" });
-
-  request.token = authorization.substring(7);
+const userExtractor = async (request, response, next) => {
+  const authorization = request.get("authorization");
+  if (authorization && authorization.toLowerCase().startsWith("bearer ")) {
+    const decodedToken = jwt.verify(
+      authorization.substring(7),
+      process.env.SECRET
+    );
+    if (decodedToken) {
+      request.user = await User.findById(decodedToken.id);
+    }
+  }
   next();
 };
 
-const userExtractor = (request, response, next) => {
-  const decodedToken = jwt.verify(request.token, process.env.SECRET);
-
-  if (!(request.token && decodedToken.id))
-    return response.status(401).json({ error: "token missing or invalid" });
-
-  request.user = { ...decodedToken };
-  next();
-};
-
-module.exports = { errorHandler, tokenExtractor, userExtractor };
+module.exports = { errorHandler, userExtractor };
