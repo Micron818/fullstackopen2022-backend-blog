@@ -49,7 +49,7 @@ blogsRouter.delete('/:id', async (request, response) => {
       .status(400)
       .json({ error: 'logined user and blog id is different' })
 
-  const removedBlog = await Blog.remove(blog)
+  const removedBlog = await Blog.findByIdAndRemove(request.params.id)
 
   user.blogs = user.blogs.filter((blog) => blog.id === removedBlog.id)
   await user.save()
