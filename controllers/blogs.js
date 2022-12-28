@@ -4,7 +4,7 @@ const Blog = require('../models/blog')
 //get all
 blogsRouter.get('/', async (request, response) => {
   const blogs = await Blog.find({}).populate('user', { username: 1, name: 1 })
-  response.json(blogs)
+  response.status(200).json(blogs)
 })
 
 //get by id
@@ -31,7 +31,11 @@ blogsRouter.post('/', async (request, response) => {
   user.blogs = user.blogs.concat(savedBlog._id)
   await user.save()
 
-  response.status(201).json(savedBlog)
+  const resultBlog = await Blog.findById(savedBlog.id).populate('user', {
+    username: 1,
+    name: 1,
+  })
+  response.status(201).json(resultBlog)
 })
 
 //delete
@@ -67,8 +71,27 @@ blogsRouter.put('/:id', async (request, response) => {
       runValidators: true,
       context: 'query',
     }
-  )
+  ).populate('user', {
+    username: 1,
+    name: 1,
+  })
   response.status(201).json(updatedBlog)
+})
+
+// add blog comments
+blogsRouter.put('/:id/comments', function (request, response) {
+  const comment = request.body.comment
+  const res = Blog.findByIdAndUpdate(
+    request.params.id,
+    { $push: { comments: comment } },
+    function (err, result) {
+      if (err) {
+        response.status(400).json(err)
+      } else {
+        response.status(201).json(result)
+      }
+    }
+  )
 })
 
 module.exports = blogsRouter
